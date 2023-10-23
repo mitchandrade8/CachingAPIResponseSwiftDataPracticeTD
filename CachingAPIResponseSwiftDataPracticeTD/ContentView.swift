@@ -10,7 +10,9 @@ import SwiftData
 
 struct ContentView: View {
     
-    @State private var photos: [Photo] = []
+    @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \Photo.id) private var photos: [Photo]
     
     var body: some View {
         NavigationStack {
@@ -65,6 +67,7 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+//        .modelContainer(for: [Photo].self)
 }
 
 @Model
@@ -110,7 +113,8 @@ extension ContentView {
         
         let photos = try JSONDecoder().decode([Photo].self, from: data)
         
-        self.photos = photos
+        photos.forEach { modelContext.insert($0) }
+        
     }
     
 }
