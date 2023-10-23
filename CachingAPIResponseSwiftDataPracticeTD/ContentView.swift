@@ -19,7 +19,7 @@ struct ContentView: View {
                     VStack(alignment: .leading) {
                         
                         AsyncImage(url: .init(string: item.url)) { image in
-                                image
+                            image
                                 .resizable()
                                 .scaledToFill()
                                 .frame(maxWidth: .infinity)
@@ -30,7 +30,7 @@ struct ContentView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 300)
-                            
+                        
                         Text(item.title)
                             .font(.caption)
                             .bold()
@@ -43,7 +43,7 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10,
                                                 style: .continuous))
                     
-                   
+                    
                 }
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -67,12 +67,37 @@ struct ContentView: View {
     ContentView()
 }
 
-struct Photo: Codable {
+@Model
+class Photo: Codable {
+    
+    @Attribute(.unique)
+    var id: Int?
+    
     let albumId: Int
-    let id: Int
     let title: String
     let url: String
     let thumbnailUrl: String
+    
+    enum CodingKeys: String, CodingKey {
+        case albumId
+        case id
+        case title
+        case url
+        case thumbnailUrl
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.albumId = try container.decode(Int.self, forKey: .albumId)
+        self.id = try container.decode(Int?.self, forKey: .id)
+        self.title = try container.decode(String.self, forKey: .title)
+        self.url = try container.decode(String.self, forKey: .url)
+        self.thumbnailUrl = try container.decode(String.self, forKey: .thumbnailUrl)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        //
+    }
 }
 
 extension ContentView {
