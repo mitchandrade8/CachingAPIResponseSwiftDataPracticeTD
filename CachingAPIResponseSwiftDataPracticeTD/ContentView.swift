@@ -10,17 +10,29 @@ import SwiftUI
 import SwiftUI
 
 struct ContentView: View {
+    
+    @State private var photos: [Photo] = []
+    
     var body: some View {
         NavigationStack {
             List {
-                ForEach(/*@START_MENU_TOKEN@*/0 ..< 5/*@END_MENU_TOKEN@*/) { _ in
+                ForEach(photos, id: \.id) { item in
                     VStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(.blue)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 300)
+                        
+                        AsyncImage(url: .init(string: item.url)) { image in
+                                image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 300)
+                                .clipped()
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 300)
                             
-                        Text("[Title here]")
+                        Text(item.title)
                             .font(.caption)
                             .bold()
                             .padding(.horizontal)
@@ -30,7 +42,7 @@ struct ContentView: View {
                     .padding(.bottom)
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 10,
-                                                style: /*@START_MENU_TOKEN@*/.continuous/*@END_MENU_TOKEN@*/))
+                                                style: .continuous))
                     
                    
                 }
@@ -41,10 +53,40 @@ struct ContentView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Color(uiColor: .systemGroupedBackground))
+            .task {
+                do {
+                    try await fetchPhotos()
+                } catch {
+                    print(error)
+                }
+            }
         }
     }
 }
 
 #Preview {
     ContentView()
+}
+
+struct Photo: Codable {
+    let albumID: Int
+    let id: Int
+    let title: String
+    let url: String
+    let thumbnailUrl: String
+}
+
+extension ContentView {
+    
+    func fetchPhotos() async throws {
+        
+        let url = URL(string: "https://jsonplaceholder.typicode.com/photos")!
+        let request = URLRequest(url: url)
+        let (data, _) = try await URLSession.shared.data(for: request)
+        
+        let photos = try JSONDecoder().decode([Photo].self, from: data)
+        
+        self.photos = photos
+    }
+    
 }
