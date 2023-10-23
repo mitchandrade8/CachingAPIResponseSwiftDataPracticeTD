@@ -6,8 +6,7 @@
 //
 
 import SwiftUI
-
-import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     
@@ -69,7 +68,7 @@ struct ContentView: View {
 }
 
 struct Photo: Codable {
-    let albumID: Int
+    let albumId: Int
     let id: Int
     let title: String
     let url: String
